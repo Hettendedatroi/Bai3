@@ -1,0 +1,219 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+
+namespace ConsoleApp4
+{
+
+    public class ArrayProcessor
+    {
+        private int[] array;
+
+  
+        public void Input()
+        {
+            Console.Write("Nhập số lượng phần tử của mảng: ");
+            int n = int.Parse(Console.ReadLine());
+            array = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                Console.Write($"Nhập phần tử thứ {i + 1}: ");
+                array[i] = int.Parse(Console.ReadLine());
+            }
+        }
+
+    
+        public void Display(string message = "")
+        {
+            if (!string.IsNullOrEmpty(message))
+            {
+                Console.WriteLine(message);
+            }
+            Console.WriteLine(string.Join(", ", array));
+            Console.WriteLine(); 
+        }
+
+
+        public void BubbleSort()
+        {
+            if (array == null || array.Length <= 1) return;
+
+            int n = array.Length;
+            bool swapped;
+            for (int i = 0; i < n - 1; i++)
+            {
+                swapped = false;
+                for (int j = 0; j < n - 1 - i; j++)
+                {
+                    if (array[j] > array[j + 1])
+                    {
+                        // Hoán đổi vị trí
+                        int temp = array[j];
+                        array[j] = array[j + 1];
+                        array[j + 1] = temp;
+                        swapped = true;
+                    }
+                }
+                if (!swapped) break;
+            }
+        }
+
+    
+        public void QuickSort(int left, int right)
+        {
+            if (array == null || left >= right) return;
+
+            int pivotIndex = Partition(left, right);
+
+
+            if (left < pivotIndex - 1)
+            {
+                QuickSort(left, pivotIndex - 1);
+            }
+     
+            if (pivotIndex < right)
+            {
+                QuickSort(pivotIndex, right);
+            }
+        }
+
+        private int Partition(int left, int right)
+        {
+            int pivot = array[(left + right) / 2]; // Chọn pivot ở giữa
+            int i = left;
+            int j = right;
+
+            while (i <= j)
+            {
+                while (array[i] < pivot) i++;
+                while (array[j] > pivot) j--;
+
+                if (i <= j)
+                {
+                    // Hoán đổi vị trí
+                    int temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                    i++;
+                    j--;
+                }
+            }
+            return i;
+        }
+
+       
+        public int LinearSearch(int key)
+        {
+            if (array == null) return -1;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] == key)
+                {
+                    return i; // Trả về chỉ số khi tìm thấy
+                }
+            }
+            return -1; // Trả về -1 nếu không tìm thấy
+        }
+
+
+        public int BinarySearch(int key)
+        {
+            if (array == null) return -1;
+            int left = 0;
+            int right = array.Length - 1;
+
+            while (left <= right)
+            {
+                int mid = left + (right - left) / 2;
+
+                if (array[mid] == key)
+                {
+                    return mid; // Tìm thấy
+                }
+                else if (array[mid] < key)
+                {
+                    left = mid + 1; // Tìm ở nửa bên phải
+                }
+                else
+                {
+                    right = mid - 1; // Tìm ở nửa bên trái
+                }
+            }
+            return -1; // Không tìm thấy
+        }
+
+
+        public int[] GetClone()
+        {
+            return (int[])array.Clone();
+        }
+
+        public void SetArray(int[] newArray)
+        {
+            this.array = newArray;
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+             Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
+
+            ArrayProcessor processor = new ArrayProcessor();
+
+            // 1. Nhập mảng và in ra mảng ban đầu
+            processor.Input();
+            processor.Display("Mảng ban đầu bạn đã nhập:");
+
+            // Tạo bản sao để sắp xếp, giữ lại mảng gốc
+            int[] originalArray = processor.GetClone();
+
+            // 2. Sắp xếp bằng Bubble Sort
+            int[] arrayForBubbleSort = (int[])originalArray.Clone();
+            processor.SetArray(arrayForBubbleSort);
+            processor.BubbleSort();
+            processor.Display("Mảng sau khi sắp xếp bằng Bubble Sort:");
+
+            // 3. Sắp xếp bằng Quick Sort
+            int[] arrayForQuickSort = (int[])originalArray.Clone();
+            processor.SetArray(arrayForQuickSort);
+            processor.QuickSort(0, arrayForQuickSort.Length - 1);
+            processor.Display("Mảng sau khi sắp xếp bằng Quick Sort:");
+
+            // 4. Tìm kiếm
+            Console.Write("Nhập giá trị bạn muốn tìm kiếm: ");
+            int key = int.Parse(Console.ReadLine());
+
+            // Tìm kiếm tuyến tính trên mảng gốc
+            processor.SetArray(originalArray);
+            int linearResult = processor.LinearSearch(key);
+            if (linearResult != -1)
+            {
+                Console.WriteLine($"Tìm kiếm tuyến tính (trên mảng gốc): Tìm thấy '{key}' tại vị trí {linearResult}.");
+            }
+            else
+            {
+                Console.WriteLine($"Tìm kiếm tuyến tính (trên mảng gốc): Không tìm thấy '{key}'.");
+            }
+
+            // Tìm kiếm nhị phân trên mảng đã sắp xếp (sử dụng kết quả từ Quick Sort)
+            processor.SetArray(arrayForQuickSort);
+            int binaryResult = processor.BinarySearch(key);
+            if (binaryResult != -1)
+            {
+                Console.WriteLine($"Tìm kiếm nhị phân (trên mảng đã sắp xếp): Tìm thấy '{key}' tại vị trí {binaryResult}.");
+            }
+            else
+            {
+                Console.WriteLine($"Tìm kiếm nhị phân (trên mảng đã sắp xếp): Không tìm thấy '{key}'.");
+            }
+
+            Console.ReadKey();
+        }
+    }
+}
