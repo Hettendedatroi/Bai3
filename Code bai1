@@ -1,0 +1,211 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApp4
+{
+    internal class MatrixProgram
+    {
+        static void Main(string[] args)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("||   CHUONG TRINH XU LY MA TRAN   ||");
+                Console.WriteLine("======================================");
+                Console.WriteLine("|| 1. Cong hai ma tran            ||");
+                Console.WriteLine("|| 2. Nhan hai ma tran            ||");
+                Console.WriteLine("|| 3. Tim ma tran chuyen vi       ||");
+                Console.WriteLine("|| 4. Tim GTLN, GTNN trong ma tran||");
+                Console.WriteLine("|| 0. Thoat chuong trinh          ||");
+                Console.WriteLine("======================================");
+                Console.Write("Moi ban chon chuc nang: ");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        AddMatrices();
+                        break;
+                    case "2":
+                        MultiplyMatrices();
+                        break;
+                    case "3":
+                        TransposeMatrix();
+                        break;
+                    case "4":
+                        FindMinMaxInMatrix();
+                        break;
+                    case "0":
+                        return; 
+                    default:
+                        Console.WriteLine("Lua chon khong hop le. Vui long chon lai.");
+                        break;
+                }
+
+                Console.WriteLine("\nNhan phim bat ky de quay lai menu chinh...");
+                Console.ReadKey(); 
+            }
+        }
+
+        private static int[,] InputMatrix(string matrixName)
+        {
+            Console.WriteLine($"\n--- NHAP MA TRAN {matrixName} ---");
+            int rows = GetDimension("Nhap so dong: ");
+            int cols = GetDimension("Nhap so cot: ");
+            int[,] matrix = new int[rows, cols];
+
+            Console.WriteLine("Nhap gia tri cho cac phan tu:");
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    Console.Write($"  Phan tu [{i}, {j}]: ");
+                    while (!int.TryParse(Console.ReadLine(), out matrix[i, j]))
+                    {
+                        Console.Write(" Hay nhap lai: ");
+                    }
+                }
+            }
+            return matrix;
+        }
+
+        private static int GetDimension(string prompt)
+        {
+            int dimension;
+            Console.Write(prompt);
+            while (!int.TryParse(Console.ReadLine(), out dimension) || dimension <= 0)
+            {
+                Console.Write("Kich thuoc phai la mot so nguyen duong, vui long nhap lai: ");
+            }
+            return dimension;
+        }
+        private static void DisplayMatrix(int[,] matrix)
+        {
+            int rows = matrix.GetLength(0);
+            int cols = matrix.GetLength(1);
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    Console.Write(matrix[i, j] + "\t"); 
+                }
+                Console.WriteLine();
+            }
+        }
+
+        private static void AddMatrices()
+        {
+            int[,] A = InputMatrix("A");
+            int[,] B = InputMatrix("B");
+
+            if (A.GetLength(0) != B.GetLength(0) || A.GetLength(1) != B.GetLength(1))
+            {
+                Console.WriteLine("\nKhong the cong hai ma tran khac kich thuoc.");
+                return;
+            }
+
+            int rows = A.GetLength(0);
+            int cols = A.GetLength(1);
+            int[,] result = new int[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    result[i, j] = A[i, j] + B[i, j];
+                }
+            }
+
+            Console.WriteLine("\nMa tran A:");
+            DisplayMatrix(A);
+            Console.WriteLine("\nMa tran B:");
+            DisplayMatrix(B);
+            Console.WriteLine("\nKet qua A + B:");
+            DisplayMatrix(result);
+        }
+
+        private static void MultiplyMatrices()
+        {
+            int[,] A = InputMatrix("A");
+            int[,] B = InputMatrix("B");
+
+            if (A.GetLength(1) != B.GetLength(0))
+            {
+                Console.WriteLine("\nKhong the nhan hai ma tran: So cot cua ma tran A phai bang so dong cua ma tran B.");
+                return;
+            }
+
+            int rowsA = A.GetLength(0);
+            int colsA = A.GetLength(1); // or rowsB
+            int colsB = B.GetLength(1);
+            int[,] result = new int[rowsA, colsB];
+
+            for (int i = 0; i < rowsA; i++)
+            {
+                for (int j = 0; j < colsB; j++)
+                {
+                    result[i, j] = 0;
+                    for (int k = 0; k < colsA; k++)
+                    {
+                        result[i, j] += A[i, k] * B[k, j];
+                    }
+                }
+            }
+
+            Console.WriteLine("\nMa tran A:");
+            DisplayMatrix(A);
+            Console.WriteLine("\nMa tran B:");
+            DisplayMatrix(B);
+            Console.WriteLine("\nKet qua A * B:");
+            DisplayMatrix(result);
+        }
+
+        private static void TransposeMatrix()
+        {
+            int[,] A = InputMatrix("A");
+            int rows = A.GetLength(0);
+            int cols = A.GetLength(1);
+            int[,] result = new int[cols, rows]; 
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    result[j, i] = A[i, j];
+                }
+            }
+            Console.WriteLine("\nMa tran A:");
+            DisplayMatrix(A);
+            Console.WriteLine("\nMa tran chuyen vi A^T:");
+            DisplayMatrix(result);
+        }
+
+      
+        private static void FindMinMaxInMatrix()
+        {
+            int[,] matrix = InputMatrix("");
+            int min = matrix[0, 0];
+            int max = matrix[0, 0];
+
+            foreach (int element in matrix)
+            {
+                if (element < min)
+                {
+                    min = element;
+                }
+                if (element > max)
+                {
+                    max = element;
+                }
+            }
+            Console.WriteLine("\nMa tran da nhap:");
+            DisplayMatrix(matrix);
+            Console.WriteLine($"\nPhan tu lon nhat trong ma tran la: {max}");
+            Console.WriteLine($"Phan tu nho nhat trong ma tran la: {min}");
+        }
+    }
+}
