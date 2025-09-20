@@ -1,0 +1,124 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+namespace TextAnalysis
+{
+    
+    public class TextProcessor
+    {
+        public string OriginalText { get; private set; }
+        public string NormalizedText { get; private set; }
+
+        public TextProcessor(string inputText)
+        {
+            OriginalText = inputText ?? "";
+            Normalize();
+        }
+
+    
+        private void Normalize()
+        {
+            if (string.IsNullOrWhiteSpace(OriginalText))
+            {
+                NormalizedText = "";
+                return;
+            }
+
+            string tempText = Regex.Replace(OriginalText, @"\s+", " ").Trim();
+
+            if (string.IsNullOrEmpty(tempText))
+            {
+                NormalizedText = "";
+                return;
+            }
+
+            tempText = char.ToUpper(tempText[0]) + tempText.Substring(1);
+
+            NormalizedText = Regex.Replace(tempText, @"([.!?])\s+([a-z])",
+                match => $"{match.Groups[1].Value} {match.Groups[2].Value.ToUpper()}");
+        }
+
+       
+        public (int TotalWords, int DistinctWords, Dictionary<string, int> Frequency) GetStatistics()
+        {
+            if (string.IsNullOrEmpty(NormalizedText))
+            {
+                return (0, 0, new Dictionary<string, int>());
+            }
+
+            char[] delimiters = { ' ', '.', ',', ';', ':', '?', '!', '(', ')', '[', ']', '"', '\r', '\n' };
+
+            string[] words = NormalizedText.ToLower()
+                                           .Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+
+            var wordFrequency = new Dictionary<string, int>();
+            foreach (string word in words)
+            {
+                if (wordFrequency.ContainsKey(word))
+                {
+                    wordFrequency[word]++;
+                }
+                else
+                {
+                    wordFrequency[word] = 1;
+                }
+            }
+
+            int totalWords = words.Length;
+            int distinctWords = wordFrequency.Count;
+
+            return (totalWords, distinctWords, wordFrequency);
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
+
+            Console.WriteLine("Vui lòng nhập vào một đoạn văn bản để xử lý:");
+            string inputText = Console.ReadLine();
+
+            TextProcessor processor = new TextProcessor(inputText);
+            var stats = processor.GetStatistics();
+
+            Console.WriteLine("\n================ KẾT QUẢ XỬ LÝ ================");
+
+         
+            Console.WriteLine("\n--- VĂN BẢN ĐÃ CHUẨN HÓA ---");
+            Console.WriteLine(processor.NormalizedText);
+
+            Console.WriteLine("\n--- THỐNG KÊ CHI TIẾT ---");
+            Console.WriteLine($"- Tổng số từ trong văn bản: {stats.TotalWords}");
+            Console.WriteLine($"- Số lượng từ khác nhau: {stats.DistinctWords}");
+
+            Console.WriteLine("\n--- BẢNG TẦN SUẤT XUẤT HIỆN CỦA TỪ ---");
+            if (stats.Frequency.Any())
+            {
+                Console.WriteLine("------------------------------------------");
+                Console.WriteLine("| Từ                  | Số lần xuất hiện |");
+                Console.WriteLine("------------------------------------------");
+
+              
+                var sortedFrequency = stats.Frequency.OrderByDescending(pair => pair.Value);
+
+                foreach (var entry in sortedFrequency)
+                {
+                    Console.WriteLine($"| {entry.Key,-19} | {entry.Value,-16} |");
+                }
+                Console.WriteLine("------------------------------------------");
+            }
+            else
+            {
+                Console.WriteLine("Không có từ nào để thống kê.");
+            }
+
+            Console.WriteLine("================================================");
+            Console.ReadKey();
+        }
+    }
+}
